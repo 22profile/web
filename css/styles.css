@@ -1,0 +1,118 @@
+@font-face {
+    font-family: 'Ignatka'; 
+    src: url('font.ttf');
+}
+
+body {
+    background-color: #0a0908;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    margin: 0;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    padding: 0;
+}
+
+.content {
+    padding: 0;
+    margin-top: 0%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+.picture {
+    margin-top: 2%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 50px;
+}
+
+.picture img {
+    width: 200px;
+    box-shadow: 0px 0px 20px rgba(200, 200, 200, 0.2);
+}
+
+.picture::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0) 100%);
+    animation: shine 4s infinite;  
+}
+
+@keyframes shine {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.content h1 {
+    color: #f2e9e4;
+    font-family: 'Ignatka';
+}
+
+.items {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    background-color: rgba(28, 28, 28, 0.496);
+    border-radius: 15px;
+    box-shadow: 0px 0px 20px rgba(127, 126, 126, 0.2);
+}
+
+.item {
+    font-family: 'Ignatka';
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: #f2e9e4;
+}
+
+.item img {
+    width: 70px;
+    border-radius: 50px;
+    margin-bottom: 5px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+@media (max-width: 600px) {
+    .picture img {
+        width: 130px;
+    }
+    .picture {
+        border-radius: 30px;
+    }
+}
+
+.item:hover span {
+    color: white;
+    text-shadow: 0px 5px 10px rgba(210, 210, 210, 0.2);
+    transition: color 0.2s ease-in-out;
+}
+
+.item:hover img {
+    box-shadow: 0px 0px 20px rgba(238, 238, 238, 0.2);
+}

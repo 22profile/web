@@ -1,0 +1,145 @@
+import * as THREE from 'three';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0908);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 5;
+
+const renderer = new THREE.WebGLRenderer({ alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const particleCount = 10000;
+const particlesGeometry = new THREE.BufferGeometry();
+const particlesPosition = new Float32Array(particleCount * 3);
+const particlesColor = new Float32Array(particleCount * 3);
+const particleColors = [0x383838, 0x727372, 0x574f4d, 0x594d44];
+
+for (let i = 0; i < particleCount; i++) {
+    particlesPosition[i * 3] = (Math.random() - 0.5) * 20; // x
+    particlesPosition[i * 3 + 1] = (Math.random() - 0.5) * 20; // y
+    particlesPosition[i * 3 + 2] = (Math.random() - 0.5) * 20; // z
+
+    const color = new THREE.Color(particleColors[Math.floor(Math.random() * particleColors.length)]);
+    particlesColor[i * 3] = color.r; // r
+    particlesColor[i * 3 + 1] = color.g; // g
+    particlesColor[i * 3 + 2] = color.b; // b
+}
+
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(particlesPosition, 3));
+particlesGeometry.setAttribute('color', new THREE.BufferAttribute(particlesColor, 3));
+
+const particlesMaterial = new THREE.PointsMaterial({
+    vertexColors: true,
+    size: 0.01,
+    transparent: true,
+    opacity: 0.5,
+});
+
+const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(particles);
+
+// function createCircle(radius, color) {
+//     const geometry = new THREE.CircleGeometry(radius, 32);
+//     const material = new THREE.MeshStandardMaterial({ color: color, side: THREE.DoubleSide });
+//     const circle = new THREE.Mesh(geometry, material);
+//     return circle;
+// }
+
+function createCircle(radius, color) {
+    const geometry = new THREE.CircleGeometry(radius, 32);
+
+    
+    const material = new THREE.ShaderMaterial({
+        uniforms: {
+            color: { value: new THREE.Color(color) },
+            opacity: { value: 1 },
+            resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+            radius: { value: radius }
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+                gl_Position = projectionMatrix * modelViewPosition;
+            }
+        `,
+        fragmentShader: `
+            uniform vec3 color;
+            uniform float opacity;
+            uniform vec2 resolution;
+            uniform float radius;
+
+            varying vec2 vUv;
+
+            void main() {
+                
+                float dist = length(vUv - vec2(0.55));
+                
+                
+                float blur = smoothstep(radius, radius + 0.4, dist);
+                vec4 col = vec4(color, opacity * (1.0 - blur));
+                
+                gl_FragColor = col;
+            }
+        `,
+        transparent: true,
+        depthWrite: false,
+    });
+
+    const circle = new THREE.Mesh(geometry, material);
+    return circle;
+}
+
+const colors = [0xf4f3ee, 0xcfdbd5, 0x778da9, 0xf0ebd8, 0xf2d492];
+const circlesCount = 300;
+const circlesArray = [];
+
+for (let i = 0; i < circlesCount; i++) {
+    const radius = Math.random() * 0.2 + 0.05;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const circle = createCircle(radius, color);
+    
+    circle.position.x = (Math.random() - 0.5) * 50;
+    circle.position.z = (Math.random() - 0.5) * 30;
+    circle.position.y = (Math.random() - 0.5) * 50;
+    scene.add(circle);
+    circlesArray.push(circle);
+}
+
+document.addEventListener('mousemove', (event) => {
+    const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    camera.position.x = mouseX * 0.5;
+    camera.position.y = mouseY * 0.5;
+    camera.lookAt(0, 0, 0);
+});
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    circlesArray.forEach(circle => {
+        circle.lookAt(camera.position);
+    });
+
+    particles.rotation.y += 0.001;
+
+    circlesArray.forEach(circle => {
+        circle.position.y += Math.sin(Date.now() * 0.001) * 0.002;
+    });
+
+    renderer.render(scene, camera);
+}
+
+window.addEventListener('resize', () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+});
+
+animate();
