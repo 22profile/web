@@ -1,2 +1,3 @@
-~~https://ignatka.ru/~~
-https://22profile.github.io/web/
+
+~~https://22profile.github.io/web/~~
+https://ignatka.ru/
